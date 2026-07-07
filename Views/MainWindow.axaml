@@ -1,0 +1,63 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AutoClickerAvalonia.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="AutoClickerAvalonia.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Clicker ?">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+        to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+
+    <Grid RowDefinitions="Auto, 10, Auto, 10, Auto, Auto, 20, Auto" ColumnDefinitions="Auto,*" Margin="20">
+        <TextBlock Grid.Row="0"
+                   Grid.Column="0" Text="Set window (Title)          " VerticalAlignment="Center"/>
+        <TextBox Grid.Row="0"
+                 Grid.Column="1" Text="{Binding WindowTitle}"/>
+
+        <RadioButton
+            Grid.Row="2"
+            Grid.Column="0"
+            Content="Left"
+            GroupName="ClickButton"
+            IsChecked="{Binding IsLeft}" />
+
+        <RadioButton
+            Grid.Row="2"
+            Grid.Column="1"
+            Content="Right"
+            GroupName="ClickButton"
+            IsChecked="{Binding IsRight}" />
+
+        <RadioButton
+            Grid.Row="4"
+            Grid.Column="0"
+            Content="Hold"
+            GroupName="ClickType"
+            IsChecked="{Binding IsHold}" />
+
+        <RadioButton
+            Grid.Row="4"
+            Grid.Column="1"
+            Content="Click"
+            GroupName="ClickType"
+            IsChecked="{Binding IsClick}" />
+
+        <TextBlock Grid.Row="5"
+                   Grid.Column="0" Text="Click delay (ms)    " VerticalAlignment="Center"/>
+        <NumericUpDown Grid.Row="5"
+                       Grid.Column="1" Minimum="0" Maximum="10000" Value="{Binding Delay}"/>
+
+        <Button Grid.Row="7"
+                Grid.Column="0" Content="Set AutoClicker"/>
+    </Grid>
+
+
+</Window>

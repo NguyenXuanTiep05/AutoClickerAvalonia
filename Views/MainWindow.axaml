@@ -16,11 +16,13 @@
     </Design.DataContext>
 
 
-    <Grid RowDefinitions="Auto, 10, Auto, 10, Auto, Auto, 20, Auto" ColumnDefinitions="Auto,*" Margin="20">
+    <Grid RowDefinitions="Auto, Auto, Auto, 10, Auto, Auto, 20, Auto" ColumnDefinitions="Auto,*" Margin="20">
         <TextBlock Grid.Row="0"
                    Grid.Column="0" Text="Set window (Title)          " VerticalAlignment="Center"/>
         <TextBox Grid.Row="0"
                  Grid.Column="1" Text="{Binding WindowTitle}"/>
+        <TextBlock Grid.Row="1"
+                   Grid.Column="0" Text="{Binding FoundWindow}" VerticalAlignment="Center"/>
 
         <RadioButton
             Grid.Row="2"
@@ -56,7 +58,7 @@
                        Grid.Column="1" Minimum="0" Maximum="10000" Value="{Binding Delay}"/>
 
         <Button Grid.Row="7"
-                Grid.Column="0" Content="Set AutoClicker"/>
+                Grid.Column="0" Content="Set AutoClicker" Command="{Binding OnOffCommand}"/>
     </Grid>
 
 

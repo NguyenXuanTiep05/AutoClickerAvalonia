@@ -1,11 +1,23 @@
 ﻿using System.Diagnostics;
+using AutoClickerAvalonia.src;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.VisualBasic;
 
 
 namespace AutoClickerAvalonia.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+
+    private readonly IMouse _mouse;
+
+    public MainWindowViewModel()
+    {
+        _mouse = new WindowsMouse();
+    }
+
     private string _windowTitle = "";
+    private string _foundWindow = "";
     private int _delay = 5;
     private string _clickButton = "Left";
     private string _clickType = "Hold";
@@ -17,12 +29,26 @@ public partial class MainWindowViewModel : ViewModelBase
         set
         {
             _windowTitle = value;
+            FoundWindow = _mouse.SearchWindow(_windowTitle);
 
             Debug.WriteLine($"Changed to {value}");
 
             OnPropertyChanged();
         }
     }
+
+    public string FoundWindow
+    {
+        get => _foundWindow;
+        set
+        {
+            _foundWindow = "Found Window: " + value;
+            OnPropertyChanged();
+        }
+    }
+
+
+
 
     public int? Delay
     {
@@ -99,6 +125,13 @@ public partial class MainWindowViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsClick));
             }
         }
+    }
+
+
+    [RelayCommand]
+    private void OnOff()
+    {
+        Debug.Write("\tWhat the sigma \t");
     }
 
 }

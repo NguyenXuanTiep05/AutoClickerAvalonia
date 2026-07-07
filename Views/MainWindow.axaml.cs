@@ -1,3 +1,4 @@
+using AutoClickerAvalonia.ViewModels;
 using Avalonia.Controls;
 
 namespace AutoClickerAvalonia.Views;
@@ -7,5 +8,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        DataContext = new MainWindowViewModel();
     }
 }

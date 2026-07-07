@@ -18,6 +18,7 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     private bool _isRunning = false;
+    public bool IsNotRunning => !_isRunning;
     public string ButtonText =>
         _isRunning
             ? "Stop AutoClicker"
@@ -141,7 +142,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _isRunning = !_isRunning;
         OnPropertyChanged(nameof(ButtonText));
-
+        OnPropertyChanged(nameof(IsNotRunning)); // add this
         if (_isRunning)
         {
             _cts?.Dispose();
@@ -175,6 +176,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 _isRunning = false;
                 _cts?.Cancel();
                 Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(ButtonText)));
+                OnPropertyChanged(nameof(IsNotRunning));
             }
         }
     }
@@ -188,20 +190,20 @@ public partial class MainWindowViewModel : ViewModelBase
                 while (!token.IsCancellationRequested)
                 {
 
-                    await _mouse.HoldAsync();
+                    await _mouse.HoldAsync(_clickButton);
                     await Task.Delay(50, token);
                 }
             }
             finally
             {
-                await _mouse.ReleaseAsync();
+                await _mouse.ReleaseAsync(_clickButton);
             }
             return;
         }
 
         while (!token.IsCancellationRequested)
         {
-            await _mouse.ClickAsync();
+            await _mouse.ClickAsync(_clickButton);
             await Task.Delay(_delay, token);
         }
     }

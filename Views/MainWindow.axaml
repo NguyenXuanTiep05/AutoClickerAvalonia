@@ -20,7 +20,7 @@
         <TextBlock Grid.Row="0"
                    Grid.Column="0" Text="Set window (Title)          " VerticalAlignment="Center"/>
         <TextBox Grid.Row="0"
-                 Grid.Column="1" Text="{Binding WindowTitle}"/>
+                 Grid.Column="1" Text="{Binding WindowTitle}" IsEnabled="{Binding IsNotRunning}"/>
         <TextBlock Grid.Row="1"
                    Grid.Column="0" Text="{Binding FoundWindow}" VerticalAlignment="Center"/>
 
@@ -29,33 +29,33 @@
             Grid.Column="0"
             Content="Left"
             GroupName="ClickButton"
-            IsChecked="{Binding IsLeft}" />
+            IsChecked="{Binding IsLeft}" IsEnabled="{Binding IsNotRunning}" />
 
         <RadioButton
             Grid.Row="2"
             Grid.Column="1"
             Content="Right"
             GroupName="ClickButton"
-            IsChecked="{Binding IsRight}" />
+            IsChecked="{Binding IsRight}" IsEnabled="{Binding IsNotRunning}" />
 
         <RadioButton
             Grid.Row="4"
             Grid.Column="0"
             Content="Hold"
             GroupName="ClickType"
-            IsChecked="{Binding IsHold}" />
+            IsChecked="{Binding IsHold}" IsEnabled="{Binding IsNotRunning}" />
 
         <RadioButton
             Grid.Row="4"
             Grid.Column="1"
             Content="Click"
             GroupName="ClickType"
-            IsChecked="{Binding IsClick}" />
+            IsChecked="{Binding IsClick}" IsEnabled="{Binding IsNotRunning}" />
 
         <TextBlock Grid.Row="5"
-                   Grid.Column="0" Text="Click delay (ms)    " VerticalAlignment="Center"/>
+                   Grid.Column="0" Text="Click delay (ms)    " VerticalAlignment="Center" IsEnabled="{Binding IsNotRunning}"/>
         <NumericUpDown Grid.Row="5"
-                       Grid.Column="1" Minimum="0" Maximum="10000" Value="{Binding Delay}"/>
+                       Grid.Column="1" Minimum="0" Maximum="10000" Value="{Binding Delay}" IsEnabled="{Binding IsNotRunning}"/>
 
         <Button Grid.Row="7"
                 Grid.Column="0" Content="{Binding ButtonText}" ClickMode="Press" Command="{Binding RunCommand}"/>

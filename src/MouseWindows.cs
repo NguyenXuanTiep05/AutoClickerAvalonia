@@ -56,7 +56,7 @@ public class WindowsMouse : IMouse
 		return "";
 	}
 
-	public Task ClickAsync()
+	public Task ClickAsync(string clickType)
 	{
 		if (_windowHandle == IntPtr.Zero)
 			throw new Exception(
@@ -72,20 +72,20 @@ public class WindowsMouse : IMouse
 
 		PostMessage(
 			target,
-			WM_LBUTTONDOWN,
-			MK_LBUTTON,
+			clickType == "Left" ? WM_LBUTTONDOWN : WM_RBUTTONDOWN,
+			clickType == "Left" ? MK_LBUTTON : MK_RBUTTON,
 			lParam);
 
 		PostMessage(
 			target,
-			WM_LBUTTONUP,
+			clickType == "Left" ? WM_LBUTTONUP : WM_RBUTTONUP,
 			IntPtr.Zero,
 			lParam);
 
 		return Task.CompletedTask;
 	}
 
-	public Task HoldAsync()
+	public Task HoldAsync(string clickType)
 	{
 		if (_windowHandle == IntPtr.Zero)
 			throw new Exception(
@@ -98,8 +98,8 @@ public class WindowsMouse : IMouse
 
 		PostMessage(
 			target,
-			WM_LBUTTONDOWN,
-			MK_LBUTTON,
+			clickType == "Left" ? WM_LBUTTONDOWN : WM_RBUTTONDOWN,
+			clickType == "Left" ? MK_LBUTTON : MK_RBUTTON,
 			lParam);
 
 		return Task.CompletedTask;
@@ -114,7 +114,7 @@ public class WindowsMouse : IMouse
 		return pid == (uint)Environment.ProcessId;
 	}
 
-	public Task ReleaseAsync()
+	public Task ReleaseAsync(string clickType)
 	{
 		if (_windowHandle == IntPtr.Zero)
 			throw new Exception(
@@ -124,7 +124,7 @@ public class WindowsMouse : IMouse
 
 		PostMessage(
 			target,
-			WM_LBUTTONUP,
+			clickType == "Left" ? WM_LBUTTONUP : WM_RBUTTONUP,
 			IntPtr.Zero,
 			lParam);
 
@@ -178,7 +178,9 @@ public class WindowsMouse : IMouse
 	private const uint WM_LBUTTONUP = 0x0202;
 
 	private static readonly IntPtr MK_LBUTTON = (IntPtr)0x0001;
-
+	private const uint WM_RBUTTONDOWN = 0x0204;
+	private const uint WM_RBUTTONUP = 0x0205;
+	private static readonly IntPtr MK_RBUTTON = (IntPtr)0x0002;
 	private const uint CWP_SKIPINVISIBLE = 0x0001;
 	private const uint CWP_SKIPTRANSPARENT = 0x0004;
 

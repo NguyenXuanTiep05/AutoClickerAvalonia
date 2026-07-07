@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using AutoClickerAvalonia.src;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.VisualBasic;
+using Avalonia.Threading;
 
 
 namespace AutoClickerAvalonia.ViewModels;
@@ -10,18 +12,23 @@ public partial class MainWindowViewModel : ViewModelBase
 {
 
     private readonly IMouse _mouse;
-
     public MainWindowViewModel()
     {
         _mouse = new WindowsMouse();
     }
 
+    private bool _isRunning = false;
+    public string ButtonText =>
+        _isRunning
+            ? "Stop AutoClicker"
+            : "Start AutoClicker";
     private string _windowTitle = "";
     private string _foundWindow = "";
     private int _delay = 5;
     private string _clickButton = "Left";
     private string _clickType = "Hold";
 
+    private CancellationTokenSource? _cts;
 
     public string WindowTitle
     {
@@ -56,6 +63,7 @@ public partial class MainWindowViewModel : ViewModelBase
         set
         {
             _delay = value ?? 5;
+            _delay = _delay < 1 ? 10 : _delay;
 
 
             Debug.WriteLine($"Changed to {_delay}");
@@ -129,9 +137,77 @@ public partial class MainWindowViewModel : ViewModelBase
 
 
     [RelayCommand]
-    private void OnOff()
+    private void Run()
     {
-        Debug.Write("\tWhat the sigma \t");
+        _isRunning = !_isRunning;
+        OnPropertyChanged(nameof(ButtonText));
+
+        if (_isRunning)
+        {
+            _cts?.Dispose();
+            _cts = new CancellationTokenSource();
+            _ = RunClicker(_cts.Token);
+        }
+        else
+        {
+            _cts?.Cancel();
+        }
     }
+
+    private async Task RunClicker(CancellationToken token)
+    {
+        try
+        {
+            // Run off the UI thread so the click loop never blocks the dispatcher.
+            await Task.Run(() => Clicker(token), token);
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"AutoClicker stopped: {ex.Message}");
+        }
+        finally
+        {
+            // The loop can end on its own (hotkey, cancellation, error) without
+            // the user having pressed the button, so reconcile state here too.
+            if (_isRunning)
+            {
+                _isRunning = false;
+                _cts?.Cancel();
+                Dispatcher.UIThread.Post(() => OnPropertyChanged(nameof(ButtonText)));
+            }
+        }
+    }
+
+    private async Task Clicker(CancellationToken token)
+    {
+        if (_clickType == "Hold")
+        {
+            await _mouse.HoldAsync();
+            try
+            {
+                while (!token.IsCancellationRequested && !GlobalHotkey.IsStopKeyDown())
+                {
+                    await Task.Delay(50, token);
+                }
+            }
+            finally
+            {
+                await _mouse.ReleaseAsync();
+            }
+            return;
+        }
+
+        while (!token.IsCancellationRequested && !GlobalHotkey.IsStopKeyDown())
+        {
+            await _mouse.ClickAsync();
+            await Task.Delay(_delay, token);
+        }
+    }
+
+
+
+
+
 
 }

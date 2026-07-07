@@ -186,7 +186,7 @@ public partial class MainWindowViewModel : ViewModelBase
             await _mouse.HoldAsync();
             try
             {
-                while (!token.IsCancellationRequested && !GlobalHotkey.IsStopKeyDown())
+                while (!token.IsCancellationRequested)
                 {
                     await Task.Delay(50, token);
                 }
@@ -198,7 +198,7 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        while (!token.IsCancellationRequested && !GlobalHotkey.IsStopKeyDown())
+        while (!token.IsCancellationRequested)
         {
             await _mouse.ClickAsync();
             await Task.Delay(_delay, token);

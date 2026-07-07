@@ -14,7 +14,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IMouse _mouse;
     public MainWindowViewModel()
     {
-        _mouse = new WindowsMouse();
+        if (OperatingSystem.IsWindows())
+        {
+            _mouse = new MouseWindows();
+        }
+        else
+        {
+            _mouse = new MouseLinux();
+        }
     }
 
     private bool _isRunning = false;

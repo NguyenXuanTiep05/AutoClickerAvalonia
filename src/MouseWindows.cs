@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AutoClickerAvalonia.src;
 
-public class WindowsMouse : IMouse
+public class MouseWindows : IMouse
 {
 	private IntPtr _windowHandle = IntPtr.Zero;
 

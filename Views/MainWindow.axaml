@@ -58,9 +58,7 @@
                        Grid.Column="1" Minimum="0" Maximum="10000" Value="{Binding Delay}"/>
 
         <Button Grid.Row="7"
-                Grid.Column="0" Content="{Binding ButtonText}" Command="{Binding RunCommand}"/>
-        <TextBlock Grid.Row="7"
-                   Grid.Column="1" Text="Press F6 to stop" VerticalAlignment="Center"/>
+                Grid.Column="0" Content="{Binding ButtonText}" ClickMode="Press" Command="{Binding RunCommand}"/>
     </Grid>
 
 

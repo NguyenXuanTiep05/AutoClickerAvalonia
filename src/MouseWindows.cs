@@ -63,6 +63,12 @@ public class WindowsMouse : IMouse
 			throw new Exception(
 				"No window selected.");
 
+		// Hold fire while our own window is in the foreground: the target
+		// activates itself on every synthetic click, which would steal focus
+		// mid-press and eat the user's click on the Stop button.
+		if (IsOwnAppForeground())
+			return Task.CompletedTask;
+
 		PostMessage(
 			_windowHandle,
 			WM_LBUTTONDOWN,
@@ -85,6 +91,9 @@ public class WindowsMouse : IMouse
 			throw new Exception(
 				"No window selected.");
 
+		if (IsOwnAppForeground())
+			return Task.CompletedTask;
+
 		PostMessage(
 			_windowHandle,
 			WM_LBUTTONDOWN,
@@ -92,6 +101,15 @@ public class WindowsMouse : IMouse
 			center);
 
 		return Task.CompletedTask;
+	}
+
+	private static bool IsOwnAppForeground()
+	{
+		GetWindowThreadProcessId(
+			GetForegroundWindow(),
+			out uint pid);
+
+		return pid == (uint)Environment.ProcessId;
 	}
 
 	public Task ReleaseAsync()
@@ -167,5 +185,13 @@ public class WindowsMouse : IMouse
 	private static extern bool GetClientRect(
 		IntPtr hWnd,
 		out RECT lpRect);
+
+	[DllImport("user32.dll")]
+	private static extern IntPtr GetForegroundWindow();
+
+	[DllImport("user32.dll")]
+	private static extern uint GetWindowThreadProcessId(
+		IntPtr hWnd,
+		out uint lpdwProcessId);
 	#endregion
 }

@@ -183,11 +183,12 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (_clickType == "Hold")
         {
-            await _mouse.HoldAsync();
             try
             {
                 while (!token.IsCancellationRequested)
                 {
+
+                    await _mouse.HoldAsync();
                     await Task.Delay(50, token);
                 }
             }

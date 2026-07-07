@@ -50,7 +50,7 @@ public partial class MainWindowViewModel : ViewModelBase
         get => _foundWindow;
         set
         {
-            _foundWindow = "Found Window: " + value;
+            _foundWindow = value;
             OnPropertyChanged();
         }
     }

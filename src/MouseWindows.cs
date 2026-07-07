@@ -58,7 +58,6 @@ public class WindowsMouse : IMouse
 
 	public Task ClickAsync()
 	{
-		IntPtr center = GetCenterLParam();
 		if (_windowHandle == IntPtr.Zero)
 			throw new Exception(
 				"No window selected.");
@@ -69,24 +68,25 @@ public class WindowsMouse : IMouse
 		if (IsOwnAppForeground())
 			return Task.CompletedTask;
 
-		PostMessage(
-			_windowHandle,
-			WM_LBUTTONDOWN,
-			IntPtr.Zero,
-			center);
+		(IntPtr target, IntPtr lParam) = GetClickTarget();
 
 		PostMessage(
-			_windowHandle,
+			target,
+			WM_LBUTTONDOWN,
+			MK_LBUTTON,
+			lParam);
+
+		PostMessage(
+			target,
 			WM_LBUTTONUP,
 			IntPtr.Zero,
-			center);
+			lParam);
 
 		return Task.CompletedTask;
 	}
 
 	public Task HoldAsync()
 	{
-		IntPtr center = GetCenterLParam();
 		if (_windowHandle == IntPtr.Zero)
 			throw new Exception(
 				"No window selected.");
@@ -94,11 +94,13 @@ public class WindowsMouse : IMouse
 		if (IsOwnAppForeground())
 			return Task.CompletedTask;
 
+		(IntPtr target, IntPtr lParam) = GetClickTarget();
+
 		PostMessage(
-			_windowHandle,
+			target,
 			WM_LBUTTONDOWN,
-			IntPtr.Zero,
-			center);
+			MK_LBUTTON,
+			lParam);
 
 		return Task.CompletedTask;
 	}
@@ -114,30 +116,56 @@ public class WindowsMouse : IMouse
 
 	public Task ReleaseAsync()
 	{
-		IntPtr center = GetCenterLParam();
 		if (_windowHandle == IntPtr.Zero)
 			throw new Exception(
 				"No window selected.");
 
+		(IntPtr target, IntPtr lParam) = GetClickTarget();
+
 		PostMessage(
-			_windowHandle,
+			target,
 			WM_LBUTTONUP,
 			IntPtr.Zero,
-			center);
+			lParam);
 
 		return Task.CompletedTask;
 	}
-	private IntPtr GetCenterLParam()
+	// Descend to the deepest child control under the window's center and
+	// aim the click straight at it. Posting to a child control instead of
+	// the top-level frame makes many apps skip their self-activation on
+	// click, which is what caused the window to flash/steal focus.
+	private (IntPtr Target, IntPtr LParam) GetClickTarget()
 	{
 		GetClientRect(_windowHandle, out RECT rect);
 
-		int width = rect.Right - rect.Left;
-		int height = rect.Bottom - rect.Top;
+		POINT pt = new()
+		{
+			X = (rect.Right - rect.Left) / 2,
+			Y = (rect.Bottom - rect.Top) / 2
+		};
 
-		int x = width / 2;
-		int y = height / 2;
+		IntPtr target = _windowHandle;
 
-		return (IntPtr)((y << 16) | (x & 0xFFFF));
+		while (true)
+		{
+			IntPtr child = ChildWindowFromPointEx(
+				target,
+				pt,
+				CWP_SKIPINVISIBLE | CWP_SKIPTRANSPARENT);
+
+			if (child == IntPtr.Zero || child == target)
+				break;
+
+			MapWindowPoints(
+				target,
+				child,
+				ref pt,
+				1);
+
+			target = child;
+		}
+
+		return (target, (IntPtr)((pt.Y << 16) | (pt.X & 0xFFFF)));
 	}
 
 	#region Win32
@@ -148,6 +176,18 @@ public class WindowsMouse : IMouse
 
 	private const uint WM_LBUTTONDOWN = 0x0201;
 	private const uint WM_LBUTTONUP = 0x0202;
+
+	private static readonly IntPtr MK_LBUTTON = (IntPtr)0x0001;
+
+	private const uint CWP_SKIPINVISIBLE = 0x0001;
+	private const uint CWP_SKIPTRANSPARENT = 0x0004;
+
+	[StructLayout(LayoutKind.Sequential)]
+	private struct POINT
+	{
+		public int X;
+		public int Y;
+	}
 
 	[DllImport("user32.dll")]
 	private static extern bool EnumWindows(
@@ -193,5 +233,18 @@ public class WindowsMouse : IMouse
 	private static extern uint GetWindowThreadProcessId(
 		IntPtr hWnd,
 		out uint lpdwProcessId);
+
+	[DllImport("user32.dll")]
+	private static extern IntPtr ChildWindowFromPointEx(
+		IntPtr hWndParent,
+		POINT pt,
+		uint flags);
+
+	[DllImport("user32.dll")]
+	private static extern int MapWindowPoints(
+		IntPtr hWndFrom,
+		IntPtr hWndTo,
+		ref POINT lpPoints,
+		uint cPoints);
 	#endregion
 }
